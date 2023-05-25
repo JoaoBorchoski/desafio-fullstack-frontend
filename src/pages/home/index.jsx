@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { Header } from "../../components/header";
 import { StyledDivHome } from "./style";
 import { RiAddLine } from "react-icons/ri";
@@ -10,6 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { formSchemaContact } from "../../components/schemas";
 import { BiTrash } from "react-icons/bi";
 import { GrEdit } from "react-icons/gr";
+import { Navigate } from "react-router-dom";
 
 export const Home = () => {
     const {
@@ -19,6 +20,8 @@ export const Home = () => {
         onSubmitContact,
         onDeleteContact,
     } = useContext(UserContext);
+
+    const token = localStorage.getItem("@token") || "";
 
     function openModal() {
         setIsOpen(true);
@@ -180,7 +183,7 @@ export const Home = () => {
         );
     };
 
-    return (
+    return token !== "" ? (
         <>
             <Header />
             <StyledDivHome>
@@ -203,5 +206,7 @@ export const Home = () => {
                 <ModalAddContact />
             </StyledDivHome>
         </>
+    ) : (
+        <Navigate to="/" />
     );
 };
