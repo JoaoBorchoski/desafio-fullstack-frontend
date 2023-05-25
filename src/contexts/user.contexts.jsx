@@ -20,39 +20,63 @@ export const UserProvider = ({ children }) => {
         try {
             const response = await Api.post("/login", data);
 
+            localStorage.setItem("@token", response.data.token);
+            localStorage.setItem("@id", response.data.id);
+
             setToken(response.data.token);
             delete response.data.token;
             setUser(response.data);
 
-            localStorage.setItem("@token", token);
-
             toast.success("Usuario Logado");
 
-            setTimeout(() => navigate("/home"), 1500);
+            navigate("/home");
         } catch (error) {
             console.log(error);
             toast.error(error.response.data.message);
         }
     };
 
+    async function getUser() {
+        const token = localStorage.getItem("@token");
+        const myId = localStorage.getItem("@id");
+
+        if (!token && !myId) {
+            console.log("oi");
+            return;
+        }
+        try {
+            const response = await Api.get(`/usersDetail/${myId}`);
+            setUser(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         async function getContacts() {
+            const token = localStorage.getItem("@token");
+            const myId = localStorage.getItem("@id");
+
+            if (!token && !myId) {
+                return;
+            }
             try {
                 const response = await Api.get("/contacts", {
                     headers: {
                         authorization: `Bearer ${token}`,
                     },
                 });
-
                 setContacts(response.data);
+
+                const responseUser = await Api.get(`/usersDetail/${myId}`);
+                setUser(responseUser.data);
             } catch (error) {
                 setContacts("");
                 console.log(error);
             }
         }
-
         getContacts();
-    }, [token, user, modalIsOpen, obs]);
+    }, [navigate, modalIsOpen, obs]);
 
     const onSubmitRegister = async (data) => {
         try {
@@ -116,6 +140,7 @@ export const UserProvider = ({ children }) => {
 
     const LogOut = () => {
         localStorage.removeItem("@token");
+        localStorage.removeItem("@id");
         setUser(null);
         navigate("/");
     };
@@ -132,6 +157,7 @@ export const UserProvider = ({ children }) => {
                 modalIsOpen,
                 setIsOpen,
                 onDeleteContact,
+                getUser,
             }}
         >
             {children}

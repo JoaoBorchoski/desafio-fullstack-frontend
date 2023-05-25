@@ -1,10 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { StyledDivHeader } from "./style";
 import { CiLogout } from "react-icons/ci";
 import { UserContext } from "../../contexts/user.contexts";
 
 export const Header = () => {
-    const { LogOut, user } = useContext(UserContext);
+    const { LogOut, user, getUser } = useContext(UserContext);
+
+    useEffect(() => {
+        getUser();
+    });
 
     return (
         <StyledDivHeader>
@@ -12,9 +16,11 @@ export const Header = () => {
                 <span>Agenda</span> Kenzie
             </h1>
             <div>
-                <h3>
-                    Olá <span>{user.name}</span>, seja bem vindo!
-                </h3>
+                {user && (
+                    <h3>
+                        Olá <span>{user.name}</span>, seja bem vindo!
+                    </h3>
+                )}
                 <button onClick={() => LogOut()}>
                     <CiLogout size={40} />
                 </button>
