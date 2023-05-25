@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [token, setToken] = useState();
     const [user, setUser] = useState();
+    const [contacts, setContacts] = useState([]);
     const navigate = useNavigate();
 
     const onSubmitLogin = async (data) => {
@@ -31,6 +32,27 @@ export const UserProvider = ({ children }) => {
             toast.error(error.response.data.message);
         }
     };
+
+    useEffect(() => {
+        async function getContacts() {
+            try {
+                const response = await Api.get("/contacts", {
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setContacts(response.data);
+
+                console.log(user);
+            } catch (error) {
+                setContacts("");
+                console.log(error);
+            }
+        }
+
+        getContacts();
+    }, [token, user]);
 
     const onSubmitRegister = async (data) => {
         try {
@@ -58,7 +80,7 @@ export const UserProvider = ({ children }) => {
 
     return (
         <UserContext.Provider
-            value={{ onSubmitLogin, onSubmitRegister, LogOut, user }}
+            value={{ onSubmitLogin, onSubmitRegister, LogOut, user, contacts }}
         >
             {children}
         </UserContext.Provider>
