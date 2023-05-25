@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { StyledDivHeader } from "./style";
 import { CiLogout } from "react-icons/ci";
 import { UserContext } from "../../contexts/user.contexts";

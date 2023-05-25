@@ -12,6 +12,8 @@ export const UserProvider = ({ children }) => {
     const [token, setToken] = useState();
     const [user, setUser] = useState();
     const [contacts, setContacts] = useState([]);
+    const [modalIsOpen, setIsOpen] = useState(false);
+    const [obs, setObs] = useState(1);
     const navigate = useNavigate();
 
     const onSubmitLogin = async (data) => {
@@ -43,8 +45,6 @@ export const UserProvider = ({ children }) => {
                 });
 
                 setContacts(response.data);
-
-                console.log(user);
             } catch (error) {
                 setContacts("");
                 console.log(error);
@@ -52,7 +52,7 @@ export const UserProvider = ({ children }) => {
         }
 
         getContacts();
-    }, [token, user]);
+    }, [token, user, modalIsOpen, obs]);
 
     const onSubmitRegister = async (data) => {
         try {
@@ -72,6 +72,48 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const onSubmitContact = async (data) => {
+        try {
+            await Api.post(
+                "/contacts",
+                {
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                },
+                {
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            toast.success("Usuario criado");
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
+        } finally {
+            setIsOpen(false);
+        }
+    };
+
+    const onDeleteContact = async (id) => {
+        try {
+            await Api.delete(`/contacts/${id}`, {
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+            });
+
+            toast.success("Contato deletado");
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
+        } finally {
+            setObs(obs + 1);
+        }
+    };
+
     const LogOut = () => {
         localStorage.removeItem("@token");
         setUser(null);
@@ -80,7 +122,17 @@ export const UserProvider = ({ children }) => {
 
     return (
         <UserContext.Provider
-            value={{ onSubmitLogin, onSubmitRegister, LogOut, user, contacts }}
+            value={{
+                onSubmitLogin,
+                onSubmitRegister,
+                LogOut,
+                user,
+                contacts,
+                onSubmitContact,
+                modalIsOpen,
+                setIsOpen,
+                onDeleteContact,
+            }}
         >
             {children}
         </UserContext.Provider>
