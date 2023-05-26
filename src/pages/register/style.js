@@ -16,7 +16,6 @@ export const StyledDivRegister = styled.div`
         width: 100%;
 
         gap: 3%;
-        margin-top: 48px;
     }
 
     form {

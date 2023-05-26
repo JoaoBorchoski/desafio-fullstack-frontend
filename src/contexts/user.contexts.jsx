@@ -36,34 +36,18 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    async function getUser() {
-        const token = localStorage.getItem("@token");
-        const myId = localStorage.getItem("@id");
-
-        if (!token && !myId) {
-            console.log("oi");
-            return;
-        }
-        try {
-            const response = await Api.get(`/usersDetail/${myId}`);
-            setUser(response.data);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
     useEffect(() => {
         async function getContacts() {
-            const token = localStorage.getItem("@token");
+            const tokenLocal = localStorage.getItem("@token");
             const myId = localStorage.getItem("@id");
 
-            if (!token && !myId) {
+            if (!tokenLocal && !myId) {
                 return;
             }
             try {
                 const response = await Api.get("/contacts", {
                     headers: {
-                        authorization: `Bearer ${token}`,
+                        authorization: `Bearer ${tokenLocal}`,
                     },
                 });
                 setContacts(response.data);
@@ -76,7 +60,7 @@ export const UserProvider = ({ children }) => {
             }
         }
         getContacts();
-    }, [navigate, modalIsOpen, obs]);
+    }, [navigate, obs]);
 
     const onSubmitRegister = async (data) => {
         try {
@@ -96,7 +80,24 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    async function getUser() {
+        const tokenLocal = localStorage.getItem("@token");
+        const myId = localStorage.getItem("@id");
+
+        if (!tokenLocal || !myId) {
+            return;
+        }
+        try {
+            const response = await Api.get("/usersDetail/" + myId);
+            setUser(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const onSubmitContact = async (data) => {
+        const tokenLocal = localStorage.getItem("@token");
+
         try {
             await Api.post(
                 "/contacts",
@@ -107,25 +108,28 @@ export const UserProvider = ({ children }) => {
                 },
                 {
                     headers: {
-                        authorization: `Bearer ${token}`,
+                        authorization: `Bearer ${tokenLocal}`,
                     },
                 }
             );
 
-            toast.success("Usuario criado");
+            toast.success("Contato criado");
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message);
+            toast.error("Ops, algo de errado aconteceu");
         } finally {
             setIsOpen(false);
+            setObs(obs + 1);
         }
     };
 
     const onDeleteContact = async (id) => {
+        const tokenLocal = localStorage.getItem("@token");
+
         try {
             await Api.delete(`/contacts/${id}`, {
                 headers: {
-                    authorization: `Bearer ${token}`,
+                    authorization: `Bearer ${tokenLocal}`,
                 },
             });
 
@@ -151,6 +155,7 @@ export const UserProvider = ({ children }) => {
                 onSubmitLogin,
                 onSubmitRegister,
                 LogOut,
+                setUser,
                 user,
                 contacts,
                 onSubmitContact,
