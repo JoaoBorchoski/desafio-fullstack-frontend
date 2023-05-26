@@ -4,11 +4,11 @@ import { CiLogout } from "react-icons/ci";
 import { UserContext } from "../../contexts/user.contexts";
 
 export const Header = () => {
-    const { LogOut, user, getUser } = useContext(UserContext);
+    const { LogOut, user, getUser, obs } = useContext(UserContext);
 
     useEffect(() => {
         getUser();
-    });
+    }, [obs]);
 
     return (
         <StyledDivHeader>
